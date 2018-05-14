@@ -1,6 +1,7 @@
 def CTPPSTrackingStripLayout(i, p, *rows): i["CTPPS/TrackingStrip/Layouts/" + p] = DQMItem(layout=rows)
 def CTPPSTrackingPixelLayout(i, p, *rows): i["CTPPS/TrackingPixel/Layouts/" + p] = DQMItem(layout=rows)
 def CTPPSTimingDiamondLayout(i, p, *rows): i["CTPPS/TimingDiamond/Layouts/" + p] = DQMItem(layout=rows)
+def TotemTimingLayout(i, p, *rows): i["CTPPS/TimingFastSilicon/Layouts/" + p] = DQMItem(layout=rows)
 
 strips_stations = [ "sector 45/station 210", "sector 56/station 210" ]
 strips_units = [ "nr", "fr" ]
@@ -12,6 +13,7 @@ pix_planes  = [ "0","1","2" ]
 pix_planes2 = [ "3","4","5" ]
 
 diamond_stations = [ "sector 45/station 220cyl/cyl_hr", "sector 56/station 220cyl/cyl_hr" ]
+totemTiming_stations = [ "sector 45/station 220/nr_tp", "sector 45/station 220/nr_bt", "sector 56/station 220/nr_tp", "sector 56/station 220/nr_bt" ]
 
 # layouts with no overlays
 for plot in [ "active planes", "activity in planes (2D)", "vfats with any problem", "track XY profile" ]:
@@ -81,6 +83,61 @@ for station in diamond_stations:
   rows.append(row)
 
   CTPPSTimingDiamondLayout(dqmitems, "clocks edges", *rows)
+  
+#####
+# Totem timing detectors layouts
+#####
+
+# layouts with no overlays
+TotTimingPlots = [   "activity per BX CMS",
+                     "active planes with time", \
+                     "amplitude", \
+                     "cell of max", \
+                     "hits in planes with time", \
+                     "hits in planes lumisection", \
+                     "mean amplitude", \
+                     "noise RMS", \
+                     "recHit time", \
+                     "tomography 220", \
+                     "tomography 210" ]
+TotTimingDrawOpt = [ {'ytype':"log"}, \
+                     {'ytype':"log"}, \
+                     {'withref':"no"}, \
+                     {'drawopts':"colztext"}, \
+                     {'drawopts':"colz"}, \
+                     {'drawopts':"colz"}, \
+                     {'drawopts':"colztext"}, \
+                     {'drawopts':"colztext"}, \
+                     {'withref':"no"}, \
+                     {'drawopts':"colz"}, \
+                     {'drawopts':"colz"} ]
+TotTimingDescription = [ \
+    "BX with activity in the detector: BX structure should be as CMS", \
+    "Planes (per event) with time information", \
+    "Amplitude of signals", \
+    "Index of the sample with maximum amplitude: should be around 20-22", \
+    "Hit map of channels with time information", \
+    "Hit map in the last lumisection: should be very similar to the cumulative map", \
+    "Mean amplitude of collected samples", \
+    "Noise RMS in the first samples (without signal)", \
+    "Time of arrival", \
+    "Coincidence with strip detectors", \
+    "Coincidence with strip detectors" ]
+
+for i in range(len(TotTimingPlots)):
+    rows = list()
+    for station in totemTiming_stations:
+      row = list()
+      path_str = "CTPPS/TimingFastSilicon/"+station+"/"+TotTimingPlots[i]
+      row.append( { "path" : path_str, "description" : TotTimingDescription[i], "draw":TotTimingDrawOpt[i] } )
+      rows.append(row)
+
+    TotemTimingLayout(dqmitems, TotTimingPlots[i], *rows)
+
+TotemTimingLayout(dqmitems, "sent digis percentage",
+          [{ "path" : "CTPPS/TimingFastSilicon/sent digis percentage", \
+         "description" : "Percentage of hits sent by DAQ", \
+         "draw": {"drawopts" : "colztext"} }])
   
 ###
 #####   CTPPS Pixel Layouts
